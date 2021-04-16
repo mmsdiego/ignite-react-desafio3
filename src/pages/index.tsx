@@ -13,6 +13,8 @@ import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import { useState } from 'react';
+import Header from '../components/Header';
 
 interface Post {
   uid?: string;
@@ -34,6 +36,50 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  const formattedPost = postsPagination.results.map(post => {
+    return {
+      ...post,
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        "d MMM yyyy",
+        {
+          locale: ptBR,
+        }
+      ),
+    }
+  })
+
+  const [posts, setPosts] = useState<Post[]>(formattedPost);
+  const [nextPage, setNextPage] = useState<string>(postsPagination.next_page)
+
+  async function handleNextPage(link: string): Promise<void> {
+    const data = await fetch(`${link}`).then(res => res.json())
+
+    setNextPage(data.next_page)
+
+    const newPosts = data.results.map(post => {
+      return {
+        uid: post.uid,
+        first_publication_date: format(
+          new Date(post.first_publication_date),
+          "d MMM yyyy",
+          {
+            locale: ptBR,
+          }
+        ),
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author
+        }
+      }
+    })
+
+    setPosts([...posts, ...newPosts])
+
+    console.log(data, posts)
+  }
+
   return (
     <>
       <Head>
@@ -41,8 +87,10 @@ export default function Home({ postsPagination }: HomeProps) {
       </Head>
 
       <main className={commonStyles.container}>
+        <Header />
+
         <div className={styles.posts}>
-          {postsPagination.results.map(post => (
+          {posts.map(post => (
             <Link href={`/post/${post.uid}`} key={post.uid}>
               <a>
                 <strong>{post.data.title}</strong>
@@ -59,13 +107,14 @@ export default function Home({ postsPagination }: HomeProps) {
             </Link>
           ))}
 
-          {postsPagination.next_page !== null ? 
+          {nextPage &&
             <button
               type="button"
+              onClick={() => handleNextPage(nextPage)}
             >
               Carregar mais posts
             </button>
-          : null}
+          }
         </div>
       </main>
     </>
@@ -84,13 +133,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        "d LLL yyyy",
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: post.data
     }
   })
