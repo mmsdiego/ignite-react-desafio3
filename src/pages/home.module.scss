@@ -24,7 +24,8 @@
       line-height: 1.625rem;
     }
 
-    time {
+    time,
+    span {
       font-size: .9rem;
       display: inline-block;
       align-items: center;
@@ -41,20 +42,7 @@
     }
 
     span {
-      font-size: .9rem;
-      display: inline-block;
-      align-items: center;
-      color: var(--gray-500);
       margin-left: 1.5rem;
-
-      svg {
-        width: 20px;
-        height: 20px;
-    
-        &:first-child {
-          margin-right: .5rem;
-        }
-      }
     }
 
     &:hover {

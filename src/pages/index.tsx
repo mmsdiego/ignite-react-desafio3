@@ -76,8 +76,6 @@ export default function Home({ postsPagination }: HomeProps) {
     })
 
     setPosts([...posts, ...newPosts])
-
-    console.log(data, posts)
   }
 
   return (
